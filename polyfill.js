@@ -43,7 +43,9 @@
   SOFTWARE.
 */
 (function () {
+    // do nothing if everything is already supported
     try {new RegExp("(?<foo>foo)"); return} catch(e) {}
+
     const
         S_NAME = "([a-zA-Z_$][a-zA-Z_$0-9]{0,50})",
         R_NAME_REPLACE = new RegExp("\\$<" + S_NAME + ">", "g"),
@@ -51,7 +53,7 @@
         R_GROUP = new RegExp("^[?:]<" + S_NAME + ">([^]*)"),
         R_GROUPS = /(\\?[()])/g,
         R_EMPTY_GROUPS = /([^\\]|^)\(\)/g,
-        A_FLAGS = Object.values("dgimsuy");
+        A_FLAGS = [... "dgimsuy"],
         dotAllBroken = (() => {
                 try {new RegExp("", "s")} catch(e) {return true}
                 return false;
@@ -72,7 +74,7 @@
                 case "(":
                     store.groups.push("");
                     store.names.push("");
-                    break
+                    break;
                 case ")":
                     block = store.groups.pop();
                     name = store.names.pop();
@@ -80,7 +82,7 @@
                     if (name) {
                         named[name] = block.substr(1);
                     }
-                    break
+                    break;
                 default:
                     // is it a real group, not a cluster (?:...), or assertion (?=...), (?!...)
                     isGroup = arr[i - 1] === "(" && !/^\?[:!=]/.test(part);
@@ -109,7 +111,7 @@
                             part = named[name[1]] || "";
                         }
                     }
-                    break
+                    break;
             }
             store.groups = store.groups.map((group) => {
                 return (group + part);
@@ -158,11 +160,11 @@
             return this._flags;
         }
         _updateGroups(res) {
-            if (res && this._named) {
+            if (res && this._named) {   
                 res.groups = {};
                 Object.entries(this._groups).forEach(([name, index]) => {
                     res.groups[name] = res[index];
-                })
+                });
                 return res.groups;
             }
         }
@@ -179,18 +181,18 @@
                     repl = replacement.replace(R_NAME_REPLACE, (_, name) => {
                         const index = groups[name];
                         return [undefined, null].includes(index) ? "" : "$" + index;
-                    })
-                    break
+                    });
+                    break;
                 case "function":
                     if (this._named) {
                         repl = ((...args) => {
-                            args.push(this._updateGroups(args));
-                            return replacement.apply(this, args);
-                        }).bind(this);
+                                args.push(this._updateGroups(args));
+                                return replacement.apply(this, args);
+                            }).bind(this);
                     } else {
                         repl = replacement.bind(this);
                     }
-                    break
+                    break;
                 default:
                     return String(repl);
             }
