@@ -55,6 +55,9 @@ TestTranspile("line1.*line2","s");
 
 TestTranspile("^\\p{L}","");
 TestTranspile("^\\p{L}","u");
+TestTranspile("^\\P{L}","u");
+TestTranspile("^[\\p{L}]+","u");
+TestTranspile("^[\\P{L}]+","u");
 
 })();
 </script>
