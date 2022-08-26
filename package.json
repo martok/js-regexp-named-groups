@@ -1,0 +1,22 @@
+{
+  "name": "regexp-named-groups",
+  "version": "1.0.0",
+  "description": "Named capturing group polyfill/transpiler",
+  "scripts": {
+    "start": "node generate.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martok/regexp-named-groups.git"
+  },
+  "author": "Martok",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/martok/regexp-named-groups/issues"
+  },
+  "homepage": "https://github.com/martok/regexp-named-groups#readme",
+  "dependencies": {
+    "jsesc": "^3.0.2",
+    "terser": "^5.15.0"
+  }
+}
