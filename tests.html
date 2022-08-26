@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="de">
+<head>
+    <meta charset="utf-8">
+    <script src="polyfill.js"></script>
+</head>
+<body>
+<p>All output is in console.log!</p>
+<script type="text/javascript">
+(function(){
+const {log, dump, error} = console;
+
+function isInstalled() {
+    return RegExp !== RegExp.prototype.constructor;
+}
+
+function TestTransform(sourcecode) {
+    const code = NamedRegExp.transform(sourcecode);
+    log([sourcecode, code]);
+}
+
+function TestTranspile(regex, flags) {
+    try {
+        const comp = RegExp(regex, flags);
+        log(comp);
+    } catch (e) {
+        log("on translating", regex, flags);
+        error(e);
+    }
+}
+
+if (!isInstalled()) {
+    log("NamedRegExp not installed!");
+    return;
+}
+
+TestTransform(String.raw`/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/`);
+TestTransform(String.raw`const expr = /^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/`);
+TestTransform(String.raw`const expr = /^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/; const x = 1;`);
+TestTransform(String.raw`const expr = /^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/, b=3`);
+TestTransform(String.raw`const expr =/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/`);
+TestTransform(String.raw`const expr =/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/; const x = 1;`);
+TestTransform(String.raw`const expr =/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/, b=3`);
+// notion
+TestTransform(String.raw`(()=>{try{return/\p{L}/u}catch(e){return/[a-zA-Z]/}})())`);
+// reddit
+TestTransform(String.raw`const i=/(?:reddit\.com\/r\/)(?<subreddit>[\w]+)(?:\/comments\/)?(?<postId>[\w]+)?/,a=e=>{`);
+// gitlab
+TestTransform(String.raw`li="TITLE_ASC",si=/^&(?<iid>\d+)$/,oi={[u.c.Issue]:`);
+TestTransform(String.raw`r=n("oj/M");const a=/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX~\s])\])?\s)(?<content>.)?/,l=/^((\s{0,3}-+\s*-+\s*-+\s*[\s-]*)|(\s{0,3}\*+\s*\*+\s*\*+\s*[\s*]*))$/;let c=!1;`);
+
+TestTranspile("^(?<indent>\\s*)(?<leader>((?<isUl>[*+-])))(\\k<leader>.)?","");
+TestTranspile("^(?<indent>\\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\\d+\\.))( \\[([xX\\s])\\])?\\s)(?<content>.)?","");
+
+TestTranspile("line1.*line2","s");
+
+TestTranspile("^\\p{L}","");
+TestTranspile("^\\p{L}","u");
+
+})();
+</script>
+</body>
+</html>
