@@ -14,7 +14,7 @@ function isInstalled() {
 }
 
 function TestTransform(sourcecode) {
-    const code = NamedRegExp.transform(sourcecode);
+    const code = NamedRegExpShim.replaceRegExpLiterals(sourcecode);
     log([sourcecode, code]);
 }
 
