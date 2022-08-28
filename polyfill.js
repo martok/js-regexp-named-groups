@@ -319,7 +319,10 @@ const CC_USED_ARG = (function () {
             }
             // Step 1. scan regexp for all features
             const scanner = new RegExpScanner(source);
-            scanner.scan(false);
+            if (!scanner.scan(false)) {
+                // scanner failed. shouldn't happen, but if it does, don't change anything.
+                return source;
+            }
             scanner.generateGroups();
             // Step 2. remove group names
             for (const [name, group] of Object.entries(scanner.names)) {
@@ -356,27 +359,36 @@ const CC_USED_ARG = (function () {
 
         const NativeRegExp = RegExp;
         class NamedRegExp extends NativeRegExp {
-            constructor(pattern, flags) {
+            constructor(pattern, flags="") {
                 if (pattern instanceof NamedRegExp) {
+                    // may need different transpilation if flags are changed
                     pattern = pattern.source;
                     flags = flags || pattern.flags;
                 }
-                flags = flags || "";
-                const
-                    cflags = flags.replace("s", ""),
-                    dotall = cflags !== flags;
-                if (!(dotall && dotAllBroken) && pattern instanceof NativeRegExp)
-                    return super(pattern, flags);
-                let {source, groups} = transpile(pattern, dotAllBroken && dotall, flags.indexOf("u")>=0);
-                const named = Object.keys(groups).length > 0;
-                super(source, cflags);
+                // canonicalize and check flags, save attributes
+                flags = A_FLAGS.filter(flag => flags.includes(flag)).join("");
+                const dotall = flags.includes("s");
+                // find out which constructor to call
+                if (!(dotall && dotAllBroken) && pattern instanceof NativeRegExp) {
+                    // pattern is an object and no mod needed
+                    super(pattern, flags);
+                } else {
+                    const {source, groups} = transpile(pattern, dotAllBroken && dotall, flags.includes("u"));
+                    const named = Object.keys(groups).length > 0;
+                    if (source === pattern && !named) {
+                        // pattern doesn't need changing, no groups, dotall doesn't matter
+                        super(pattern, flags);
+                    } else {
+                        // pattern was transpiled to source, flags may have changed
+                        const cflags = flags.replace("s", "");
+                        super(source, cflags);
+                        this._groups = groups;
+                        this._named = named;
+                    }
+                }
+                this._flags = flags;
                 this._source = pattern;
                 this._dotall = dotall;
-                this._groups = groups;
-                this._named = named;
-                this._flags = A_FLAGS.map((flag) => {
-                        return flags.includes(flag) ? flag : "";
-                    }).join("");
             }
             get source() {
                 return this._source;

@@ -33,6 +33,9 @@ if (!isInstalled()) {
     return;
 }
 
+TestTranspile("^/+","");
+TestTranspile("/+$","");
+
 TestTransform(String.raw`/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/`);
 TestTransform(String.raw`const expr = /^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/`);
 TestTransform(String.raw`const expr = /^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/; const x = 1;`);
@@ -40,6 +43,7 @@ TestTransform(String.raw`const expr = /^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|
 TestTransform(String.raw`const expr =/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/`);
 TestTransform(String.raw`const expr =/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/; const x = 1;`);
 TestTransform(String.raw`const expr =/^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX\s])\])?\s)(?<content>.)?/, b=3`);
+TestTransform(String.raw`escape:/^\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_\`{|}~])/,autolink`);
 // notion
 TestTransform(String.raw`(()=>{try{return/\p{L}/u}catch(e){return/[a-zA-Z]/}})())`);
 // reddit
@@ -52,12 +56,16 @@ TestTranspile("^(?<indent>\\s*)(?<leader>((?<isUl>[*+-])))(\\k<leader>.)?","");
 TestTranspile("^(?<indent>\\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\\d+\\.))( \\[([xX\\s])\\])?\\s)(?<content>.)?","");
 
 TestTranspile("line1.*line2","s");
+TestTranspile(String.raw`^\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_\`{|}~~|])`,"");
 
+/*
 TestTranspile("^\\p{L}","");
 TestTranspile("^\\p{L}","u");
 TestTranspile("^\\P{L}","u");
 TestTranspile("^[\\p{L}]+","u");
 TestTranspile("^[\\P{L}]+","u");
+*/
+
 
 })();
 </script>
