@@ -130,14 +130,17 @@ const CC_USED_ARG = (function () {
                         inCC = false;
                         break;
                     case "(":
-                        groupBegins.push(p);
+                        if (!inCC)
+                            groupBegins.push(p);
                         break;
                     case ")":
-                        const beg = groupBegins.pop();
-                        if (typeof beg == "undefined") {
-                            return false;
+                        if (!inCC) {
+                            const beg = groupBegins.pop();
+                            if (typeof beg == "undefined") {
+                                return false;
+                            }
+                            this.parens.push([beg-start, p-start]);
                         }
-                        this.parens.push([beg-start, p-start]);
                         break;
                     case ".":
                         this.specialchars.push([p - start, inCC]);
@@ -154,17 +157,17 @@ const CC_USED_ARG = (function () {
                         }
                         break;
                     case "/":
-                        if (locateEnd) {
-                            if (!inCC)
-                                return p;
-                        } else {
-                            // if we weren't supposed to locate the end, finding one is an error
-                            return false;
-                        }
+                        // if we're not looking for the end, / is a normal character
+                        if (locateEnd && !inCC)
+                            return p;
                         break;
                     case "\r":
                     case "\n":
-                        return false;
+                        if (locateEnd) {
+                            // for direct scanning, only support single line expressions
+                            // if we're in a RegExp() constructor, linebreak is same as escaped \n character
+                            return false;
+                        }
                 }
                 p++;
             }
