@@ -140,7 +140,7 @@ const CC_USED_ARG = (function () {
                         this.parens.push([beg-start, p-start]);
                         break;
                     case ".":
-                        this.specialchars.push([p - 1 - start, inCC]);
+                        this.specialchars.push([p - start, inCC]);
                         break;
                     case "\\":
                         if (p<source.length-1) {
@@ -178,7 +178,7 @@ const CC_USED_ARG = (function () {
         shouldRewritePattern() {
             // does this RE use anything obviously unsupported?
             // assumes that we did scan flags
-            for (const p of this.specialchars) {
+            for (const [p, inCC] of this.specialchars) {
                 if (this.pattern.charAt(p) == ".") {
                     // have to fix dot=newline?
                     if (this.flags.indexOf("s")>=0)
