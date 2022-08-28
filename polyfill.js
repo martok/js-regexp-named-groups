@@ -118,7 +118,10 @@ const CC_USED_ARG = (function () {
             let p = start;
             let inCC = false;
             let groupBegins = [];
-            while (p<source.length && p-start<MAX_RE_LEN) {
+            while (p<source.length) {
+                if (locateEnd &&  p-start >= MAX_RE_LEN) {
+                    return false;
+                }
                 switch(source.charAt(p)) {
                     case "[":
                         inCC = true;
@@ -441,9 +444,7 @@ const CC_USED_ARG = (function () {
     if (CC_HOST) {
         const NamedRegExpShim = class {
             static replaceRegExpLiterals(source) {
-                const R_RE_START = /(^|return|throw|[=,;({[\s])\//gm,
-                      R_NEEDS_REPLACE = /\(\?<|\\p|\\P/,
-                      MAX_RE_LEN = 1000;
+                const R_RE_START = /(^|return|throw|[=,;({[\s])\//gm;
 
                 const searchFrom = (index, re) => {
                     re.lastIndex = index;
