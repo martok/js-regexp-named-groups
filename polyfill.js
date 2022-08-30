@@ -375,12 +375,12 @@ const CC_USED_ARG = (function () {
                 } else {
                     const {source, groups} = transpile(pattern, dotAllBroken && dotall, flags.includes("u"));
                     const named = Object.keys(groups).length > 0;
+                    const cflags = flags.replace("s", "");
                     if (source === pattern && !named) {
                         // pattern doesn't need changing, no groups, dotall doesn't matter
-                        super(pattern, flags);
+                        super(pattern, cflags);
                     } else {
                         // pattern was transpiled to source, flags may have changed
-                        const cflags = flags.replace("s", "");
                         super(source, cflags);
                         if (named)
                             this._groups = groups;
