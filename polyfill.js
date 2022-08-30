@@ -382,8 +382,8 @@ const CC_USED_ARG = (function () {
                         // pattern was transpiled to source, flags may have changed
                         const cflags = flags.replace("s", "");
                         super(source, cflags);
-                        this._groups = groups;
-                        this._named = named;
+                        if (named)
+                            this._groups = groups;
                     }
                 }
                 this._flags = flags;
@@ -400,7 +400,7 @@ const CC_USED_ARG = (function () {
                 return this._flags;
             }
             _updateGroups(res) {
-                if (res && this._named) {
+                if (res && this._groups) {
                     res.groups = {};
                     Object.entries(this._groups).forEach(([name, index]) => {
                         res.groups[name] = res[index];
@@ -414,28 +414,17 @@ const CC_USED_ARG = (function () {
                 return res;
             }
             [Symbol.replace](str, replacement) {
-                let repl = replacement
-                switch (typeof replacement) {
-                    case "string":
-                        const groups = this._groups;
-                        repl = replacement.replace(R_NAME_REPLACE, (_, name) => {
-                            const index = groups[name];
-                            return [undefined, null].includes(index) ? "" : "$" + index;
-                        });
-                        break;
-                    case "function":
-                        if (this._named) {
-                            repl = ((...args) => {
-                                    args.push(this._updateGroups(args));
-                                    return replacement.apply(this, args);
-                                }).bind(this);
-                        } else {
-                            repl = replacement.bind(this);
-                        }
-                        break;
-                    default:
-                        return String(repl);
-                }
+                const groups = this._groups;
+                const repl = groups ? (typeof replacement === "function") ?
+                    ((...args) => {
+                        args.push(this._updateGroups(args));
+                        return replacement(...args);
+                    }) :
+                    String(replacement).replace(R_NAME_REPLACE, (_, name) => {
+                        const index = groups[name];
+                        return [undefined, null].includes(index) ? "" : "$" + index;
+                    }) :
+                    replacement;
                 return super[Symbol.replace](str, repl);
             }
         }
